@@ -5,6 +5,7 @@ import DatasetsPage from "./pages/DatasetsPage";
 import GovernancePage from "./pages/GovernancePage";
 import LoginPage from "./pages/LoginPage";
 import OverviewPage from "./pages/OverviewPage";
+import ReviewsPage from "./pages/ReviewsPage";
 import RunDetailPage from "./pages/RunDetailPage";
 import { getToken } from "./api/client";
 
@@ -20,6 +21,7 @@ export default function App() {
       <Route path="/datasets" element={<DatasetsPage/>}/>
       <Route path="/analyses" element={<AnalysesPage/>}/>
       <Route path="/runs/:runId" element={<RunDetailPage/>}/>
+      <Route path="/reviews" element={<ReviewsPage/>}/>
       <Route path="/governance" element={<GovernancePage/>}/>
     </Route>
     <Route path="*" element={<Navigate to="/overview" replace/>}/>

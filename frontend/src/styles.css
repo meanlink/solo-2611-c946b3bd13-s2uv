@@ -150,6 +150,28 @@ h3 { font-size: 16px; }
 .tab { padding: 10px 0; color: var(--muted); border-bottom: 2px solid transparent; }
 .tab.active { color: var(--ink); border-color: var(--accent); }
 
+/* 逐笔复核台 */
+.review-badge { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; padding: 3px 8px; border: 1px solid var(--line); white-space: nowrap; }
+.review-badge.pending { color: var(--warning); border-color: var(--warning); }
+.review-badge.false_positive { color: var(--muted); }
+.review-badge.under_investigation { color: var(--danger); border-color: var(--danger); }
+.filter-bar { display: flex; gap: 12px; flex-wrap: wrap; align-items: end; }
+.filter-bar .field { min-width: 160px; }
+.review-layout { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(300px, .9fr); gap: 26px; align-items: start; }
+.review-table { font-size: 12px; }
+.review-table tr.clickable { cursor: pointer; }
+.review-table tr.selected { background: var(--accent-soft); }
+.review-table tr.superseded-row { opacity: .55; }
+.decision-form { display: grid; gap: 12px; }
+.decision-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.conflict-box { border-left: 3px solid var(--danger); background: oklch(30% .04 27 / .16); padding: 14px 16px; display: grid; gap: 8px; font-size: 13px; }
+.timeline { display: grid; gap: 0; }
+.timeline-item { border-left: 2px solid var(--line); padding: 0 0 18px 16px; position: relative; }
+.timeline-item::before { content: ""; position: absolute; left: -5px; top: 4px; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+.timeline-item .muted { font-size: 11px; margin-bottom: 4px; }
+.review-hint { font-size: 12px; color: var(--muted); line-height: 1.7; }
+@media (max-width: 1024px) { .review-layout { grid-template-columns: 1fr; } }
+
 /* Nine deliberately different spatial systems share the same accessible components. */
 .layout-blueprint body, body.layout-blueprint {
   background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);

@@ -6,13 +6,15 @@ export const ENTITY_LABELS = [
   "检测方案",
   "复核任务",
   "审计记录",
-  "复核意见"
+  "复核意见",
+  "逐笔判定"
 ] as const;
 export const PAGE_LABELS = [
   "夜间告警",
   "交易资产",
   "检测编排",
   "异常复核",
+  "逐笔复核",
   "治理审计"
 ] as const;
 export const ALGORITHM_LABELS = [

@@ -10,6 +10,7 @@ from src.models.analysis_run import AnalysisRun
 from src.models.comment import Comment
 from src.models.dataset import Dataset
 from src.services.analysis_engine import run_algorithm
+from src.services import review_service
 
 
 def list_runs(db: Session) -> list[AnalysisRun]:
@@ -26,13 +27,15 @@ def execute_run(db: Session, analysis: Analysis, actor_id: str) -> AnalysisRun:
         raise ValueError("关联数据资产不存在")
     serialized = json.dumps(dataset.rows, sort_keys=True, ensure_ascii=False).encode()
     checksum = hashlib.sha256(serialized).hexdigest()
-    natural_key = f"{analysis.id}:{checksum[:12]}:{datetime.now(timezone.utc).timestamp():.6f}"
+    rule_fp = review_service.rule_fingerprint(analysis.config or {})
+    natural_key = f"{analysis.id}:{checksum[:12]}:{rule_fp[:12]}:{datetime.now(timezone.utc).timestamp():.6f}"
     run = AnalysisRun(
         natural_key=natural_key,
         status="running",
         analysis_id=analysis.id,
         created_by=actor_id,
         checksum=checksum,
+        rule_fingerprint=rule_fp,
         started_at=datetime.now(timezone.utc),
     )
     db.add(run)
@@ -44,6 +47,9 @@ def execute_run(db: Session, analysis: Analysis, actor_id: str) -> AnalysisRun:
         run.status = "completed"
         run.completed_at = datetime.now(timezone.utc)
         analysis.status = "completed"
+        # 幂等同步逐笔复核待办：同数据同规则复用，数据/规则变更则产生新待办。
+        run.review_sync = review_service.sync_anomalies(db, run, analysis)
+        db.flush()
     except Exception as exc:
         run.status = "failed"
         run.error_message = str(exc)

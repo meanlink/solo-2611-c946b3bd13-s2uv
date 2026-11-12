@@ -13,6 +13,8 @@ from src.models.comment import Comment
 from src.models.dataset import Dataset
 from src.models.user import User
 from src.models.workspace import Workspace
+from src.migrations import ensure_columns
+from src.services import review_service
 from src.services.run_service import execute_run
 from src.utils.security import hash_password
 
@@ -29,6 +31,7 @@ def wait_for_database(attempts=30):
     for index in range(attempts):
         try:
             Base.metadata.create_all(bind=engine)
+            ensure_columns(engine)
             return
         except Exception as exc:
             if index == attempts - 1:
@@ -39,6 +42,7 @@ def wait_for_database(attempts=30):
 
 def seed():
     Base.metadata.create_all(bind=engine)
+    ensure_columns(engine)
     db = SessionLocal()
     try:
         users = {}
@@ -133,7 +137,14 @@ def seed():
                 run = execute_run(db, analysis, analyst.id)
                 run.natural_key = natural_key
                 db.flush()
+            elif not run.rule_fingerprint:
+                # 兼容旧演示库：补齐规则指纹并幂等回填逐笔复核待办。
+                run.rule_fingerprint = review_service.rule_fingerprint(analysis.config or {})
+                run.review_sync = review_service.sync_anomalies(db, run, analysis)
+                db.flush()
             runs.append(run)
+
+        anomaly_count = len(review_service.list_anomalies(db))
 
         if not db.scalar(select(Comment).where(Comment.natural_key == "seed-comment-0")):
             db.add(Comment(natural_key="seed-comment-0",
@@ -151,7 +162,8 @@ def seed():
                             detail={"datasets": len(datasets), "analyses": len(analyses),
                                      "project": "anomaly-review"}))
         db.commit()
-        print(f"seed complete: users=3 datasets={len(datasets)} analyses={len(analyses)} runs={len(runs)}")
+        print(f"seed complete: users=3 datasets={len(datasets)} analyses={len(analyses)} "
+              f"runs={len(runs)} anomalies={anomaly_count}")
     finally:
         db.close()
 

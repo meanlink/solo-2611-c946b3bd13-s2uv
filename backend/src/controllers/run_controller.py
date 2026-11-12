@@ -22,7 +22,9 @@ def execute(db: Session, analysis_id: str, user) -> RunRead:
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     audit_service.record(db, "analysis.run", "analysis_run", item.id, user.id,
-                         {"status": item.status, "checksum": item.checksum})
+                         {"status": item.status, "checksum": item.checksum,
+                          "rule_fingerprint": item.rule_fingerprint,
+                          "review_sync": item.review_sync})
     db.commit()
     db.refresh(item)
     return RunRead.model_validate(item)

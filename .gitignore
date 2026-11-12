@@ -28,6 +28,7 @@ out/
 .cache/
 .vite/
 .parcel-cache/
+*.tsbuildinfo
 coverage/
 venv/
 target/

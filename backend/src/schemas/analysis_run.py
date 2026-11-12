@@ -10,6 +10,8 @@ class RunRead(ORMModel):
     metrics: list
     error_message: str
     checksum: str
+    rule_fingerprint: str = ""
+    review_sync: dict = {}
     started_at: datetime | None
     completed_at: datetime | None
     analysis_id: str

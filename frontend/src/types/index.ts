@@ -5,8 +5,25 @@ export interface Dataset { id:string; name:string; source:string; status:string;
 export interface Analysis { id:string; name:string; kind:string; status:string; hypothesis:string; config:Record<string,unknown>; dataset_id:string; workspace_id:string; created_by:string; }
 export interface Metric { label:string; value:number|string; unit?:string; tone?:string; }
 export interface Series { label:string; value:number; }
-export interface RunResult { headline:string; narrative:string; metrics:Metric[]; series:Series[]; table:Record<string,unknown>[]; method:string; caveat:string; }
-export interface Run { id:string; status:string; result:RunResult; metrics:Metric[]; error_message:string; checksum:string; analysis_id:string; created_at:string; }
+export interface RunResult { headline:string; narrative:string; metrics:Metric[]; series:Series[]; table:Record<string,unknown>[]; method:string; caveat:string; flagged?:FlaggedTransaction[]; }
+export interface FlaggedTransaction { transaction_id:string; merchant:string; amount:number; hour:number; velocity:number; score:number; z:number; }
+export interface Run { id:string; status:string; result:RunResult; metrics:Metric[]; error_message:string; checksum:string; rule_fingerprint?:string; review_sync?:{created:number;reused:number;total:number}; analysis_id:string; created_at:string; }
 export interface Audit { id:string; action:string; resource_type:string; resource_id:string; actor_id:string; detail:Record<string,unknown>; created_at:string; }
 export interface Comment { id:string; body:string; decision:string; run_id:string; author_id:string; created_at:string; }
 export interface ListResponse<T> { items:T[]; total:number; }
+export type ReviewStatusValue = "pending" | "false_positive" | "under_investigation";
+export interface ReviewDecision {
+  id:string; anomaly_id:string; fingerprint:string; transaction_id:string;
+  decision:ReviewStatusValue; reason:string; version:number; expected_version:number;
+  run_id:string; analysis_id:string; reviewer_id:string; reviewer_name:string;
+  created_at:string; updated_at:string;
+}
+export interface Anomaly {
+  id:string; fingerprint:string; transaction_id:string; merchant:string;
+  signal:Record<string,number|string>; rule_fingerprint:string; data_checksum:string;
+  analysis_id:string; workspace_id:string; latest_run_id:string;
+  review_status:ReviewStatusValue; version:number; superseded:boolean;
+  created_at:string; updated_at:string;
+}
+export interface AnomalyDetail extends Anomaly { decisions:ReviewDecision[]; }
+export interface AnomalyListResponse { items:Anomaly[]; total:number; summary:Record<string,number>; }
